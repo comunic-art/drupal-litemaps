@@ -1,1 +1,4 @@
 name = LiteMaps
+description = Provides Google Maps API v3 integration to Views through jQuery LiteMaps.
+core = 6.x
+dependencies[] = views
