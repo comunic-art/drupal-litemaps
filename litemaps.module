@@ -1,0 +1,295 @@
+<?php
+
+/**
+ * Google Maps API JS file
+ */
+define('LITEMAPS_GOOGLE_MAPS_API_JS', 'http://maps.google.com/maps/api/js?sensor=false&libraries=places');
+
+/**
+ * Default width for location picker
+ */
+define('LITEMAPS_PICKER_WIDTH', 500);
+
+/**
+ * Default height for location picker
+ */
+define('LITEMAPS_PICKER_HEIGHT', 300);
+
+/**
+ * Default center for location picker
+ */
+define('LITEMAPS_PICKER_CENTER', 'auto');
+
+/**
+ * Default zoom for location picker
+ */
+define('LITEMAPS_PICKER_ZOOM', 5);
+
+/**
+ * Default status of debug mode
+ */
+define('LITEMAPS_DEBUG', 0);
+
+/**
+ * Get entity point of an entity.
+ * 
+ * @param $entity Entity type. e. g. node, user, term
+ * @param $eid Entity ID. nid for nodes, uid for users, tid for terms
+ * @return An array with keys "latitude" and "longitude"
+ */
+function litemaps_get_point($entity, $eid) {
+  $query = "SELECT latitude, longitude FROM {litemaps_points} WHERE entity = '%s' AND eid = %d";
+  $result = db_query($query, $entity, $eid);
+  return db_fetch_array($result);
+}
+
+/**
+ * Set point for entity. If latitude and longitude are not set, delete point.
+ * 
+ * @param $entity Entity type. e. g. node, user, term
+ * @param $eid Entity ID. nid for nodes, uid for users, tid for terms
+ * @param $latitude Latitude
+ * @param $longitude Longitude
+ */
+function litemaps_set_point($entity, $eid, $latitude = '', $longitude = '') {
+  db_query("DELETE FROM {litemaps_points} WHERE entity = '%s' AND eid = %d", $entity, $eid);
+  
+  if ($latitude != '' && $longitude != '') {
+    $query = "INSERT INTO {litemaps_points} (entity, eid, latitude, longitude) VALUES ('%s', %d, %f, %f)";
+    db_query($query, $entity, $eid, $latitude, $longitude);
+  }
+}
+
+/**
+ * Add needed libraries.
+ */
+function litemaps_add_js() {
+  static $added = FALSE;
+  
+  if ($added) {
+    return;
+  }
+  
+  drupal_set_html_head('<script type="text/javascript" src="' . variable_get('litemaps_google_maps_api_js', LITEMAPS_GOOGLE_MAPS_API_JS) . '"></script>');
+  
+  $js_path = drupal_get_path('module', 'litemaps') . '/js';
+  if (variable_get('litemaps_debug', LITEMAPS_DEBUG)) {
+    drupal_add_js("$js_path/jquery.litemaps.js");
+    drupal_add_js("$js_path/litemaps.js");
+  }
+  else {
+    drupal_add_js("$js_path/jquery.litemaps.min.js");
+    drupal_add_js("$js_path/litemaps.min.js");
+  }
+  
+  $added = TRUE;
+}
+
+/**
+ * Generate an unique map ID
+ */
+function litemaps_autoid() {
+  static $id = 0;
+  return $id++;  
+}
+
+/**
+ * Implements hook_theme().
+ */
+function litemaps_theme() {
+  return array(
+    'litemaps' => array(
+      'arguments' => array('options' => NULL),
+    ),
+  );
+}
+
+/**
+ * LiteMaps element theme hook.
+ *
+ * @param string $width Width of rendered map. You can specify 'px' or '%'.
+ * @param string $height Height of rendered map. You can specify 'px' or '%'.
+ * @param array $markers An array with markers
+ * @return void Rendered map
+ */
+function theme_litemaps($options = array()) {
+  litemaps_add_js();
+  
+  $mapid = "litemaps-" . litemaps_autoid();
+  
+  drupal_add_js(array('litemaps' => array($mapid => $options)), 'setting');
+  return "<div id='$mapid'></div>";
+}
+
+/**
+ * Implementation of hook_form_FORM_ID_alter().
+ */
+function litemaps_form_node_type_form_alter(&$form, $form_state) {
+  $form['litemaps'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('LiteMaps'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  
+  $form['litemaps']['litemaps_picker'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show location picker in node form'),
+    '#default_value' => variable_get('litemaps_location_'. $form['#node_type']->type, 0),
+  );
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function litemaps_form_alter(&$form, $form_state, $form_id) {
+  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && variable_get('litemaps_location_' . $form['#node']->type, 0)) {
+    $form = litemaps_form_node_after_build($form, $form_state);
+    $form['#after_build'][] = 'litemaps_form_node_after_build';
+  }
+}
+
+/**
+ * After build callback for node form. This is required because
+ * hook_form_alter() does not work after a fail validation.
+ */
+function litemaps_form_node_after_build($form, $form_state) {  
+  $node = $form['#node'];
+
+  $latitude = '';
+  $longitude = '';
+
+  if (isset($form_state['values']) && isset($form_state['values']['litemaps'])
+    && $form_state['values']['litemaps']['latitude'] != ''
+    && $form_state['values']['litemaps']['longitude'] != '') {
+    
+    $latitude = $form_state['values']['litemaps']['latitude'];
+    $longitude = $form_state['values']['litemaps']['longitude'];
+    
+  }
+  elseif (! empty($node->nid)) {
+    $latitude = $node->litemaps['latitude'];
+    $longitude = $node->litemaps['longitude'];
+  }
+
+  if (! isset($form['litemaps'])) {
+    $form['litemaps'] = array(
+      '#tree' => TRUE,
+    );
+
+    $form['litemaps']['latitude'] = array(
+      '#type' => 'hidden',
+      '#default_value' => $latitude,
+    );
+
+    $form['litemaps']['longitude'] = array(
+      '#type' => 'hidden',
+      '#default_value' => $longitude,
+    );
+  }
+  
+  $options = array(
+    'picker' => TRUE,
+    'zoom' => variable_get('litemaps_picker_zoom', LITEMAPS_PICKER_ZOOM),
+    'center' => variable_get('litemaps_picker_center', LITEMAPS_PICKER_CENTER),
+    'width' => variable_get('litemaps_picker_width', LITEMAPS_PICKER_WIDTH),
+    'height' => variable_get('litemaps_picker_height', LITEMAPS_PICKER_HEIGHT),
+  );
+
+  if ($latitude != '' && $longitude != '') {
+    $options['zoom'] = 'auto';
+    $options['markers'][] = array(
+      'lat' => $latitude,
+      'lng' => $longitude,
+    );
+    $options['center'] = 'auto';
+  }
+
+  $form['litemaps']['picker']['#value'] = theme('litemaps', $options);
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function litemaps_nodeapi(&$node, $op) {
+  if (variable_get('litemaps_location_' . $node->type, 0)) {
+   switch($op) {
+     case 'insert':
+     case 'update':
+       litemaps_set_point('node', $node->nid, $node->litemaps['latitude'], $node->litemaps['longitude']);
+       break;
+
+     case 'delete':
+       litemaps_set_point('node', $node->nid);
+       break;
+
+     case 'load':
+       $node->litemaps = litemaps_get_point('node', $node->nid);
+       break;
+   }
+  }
+}
+
+/**
+* Implementation of hook_views_api().
+*/
+function litemaps_views_api() {
+  return array('api' => 2.0);
+}
+
+/**
+* Implementation of hook_views_plugins
+*/
+function litemaps_views_plugins() {
+  return array(
+    'style' => array(
+      'litemaps' => array(
+        'title' => t('LiteMaps'),
+        'theme' => 'views_view_litemaps',
+        'help' => t('LiteMaps Views style using jQuery LiteMaps plugin.'),
+        'handler' => 'litemaps_views_plugin_style',
+        'uses row plugin' => TRUE,
+        'uses fields' => TRUE,
+        'uses options' => TRUE,
+        'type' => 'normal',       
+      ),
+    ), 
+  );
+}
+
+/**
+ * Implementation of hook_preprocess_views_view_litemaps().
+ */
+function template_preprocess_views_view_litemaps(&$vars) {
+  if (! count($vars['rows'])) {
+    return;
+  }
+  
+  $options = array();
+  if ($vars['options']['height']) {
+    $options['height'] = $vars['options']['height'];
+  }
+  if ($vars['options']['width']) {
+    $options['width'] = $vars['options']['width'];
+  }
+  
+  if ($vars['options']['staticmap']) {
+    $options['staticmap'] = TRUE;
+  }
+  
+  if ($vars['options']['zoom']) {
+    $options['zoom'] = $vars['options']['zoom'];
+  }
+  
+  $alias_latitude = $vars['view']->litemaps->alias_latitude;  
+  $alias_longitude = $vars['view']->litemaps->alias_longitude;
+  foreach($vars['rows'] as $row_id => $row) {
+    $latitude = $vars['view']->result[$row_id]->{$alias_latitude};
+    $longitude = $vars['view']->result[$row_id]->{$alias_longitude};
+    $options['markers'][] = array('lat' => $latitude, 'lng' => $longitude, 'content' => $row);
+  }
+  
+  $vars['map'] = theme('litemaps', $options);
+}

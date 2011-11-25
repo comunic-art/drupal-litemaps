@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function litemaps_install() {
+  drupal_install_schema('litemaps');
+}
+
+/**
+ * Implentation of hook_uninstall().
+ */
+function litemaps_uninstall() {
+  drupal_uninstall_schema('litemaps');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function litemaps_schema() {
+  $schema['litemaps_points'] = array(
+    'description' => 'Locational points.',
+    'fields' => array(
+      'entity' => array(
+        'description' => 'Entity type.',
+        'type' => 'varchar',
+        'length' => 64,
+        'default' => '',
+        'not null' => TRUE,
+      ),
+      'eid' => array(
+        'description' => 'Entity ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'latitude' => array(
+        'description' => 'Location latitude (decimal degrees).',
+        'type' => 'numeric',
+        'precision' => 21,
+        'scale' => 17,
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+      'longitude' => array(
+        'description' => 'Location longitude (decimal degrees).',
+        'type' => 'numeric',
+        'precision' => 21,
+        'scale' => 17,
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+    ),
+    'indexes' => array(
+      'entity' => array('entity'),
+      'eid' => array('eid'),
+    ),
+    'primary key' => array('entity', 'eid'),
+  );
+
+  return $schema;
+}
