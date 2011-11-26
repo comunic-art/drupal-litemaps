@@ -135,7 +135,7 @@ function litemaps_form_node_type_form_alter(&$form, $form_state) {
   $form['litemaps']['litemaps_picker'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show location picker in node form'),
-    '#default_value' => variable_get('litemaps_location_'. $form['#node_type']->type, 0),
+    '#default_value' => variable_get('litemaps_picker_'. $form['#node_type']->type, 0),
   );
 }
 
@@ -143,7 +143,7 @@ function litemaps_form_node_type_form_alter(&$form, $form_state) {
  * Implementation of hook_form_alter().
  */
 function litemaps_form_alter(&$form, $form_state, $form_id) {
-  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && variable_get('litemaps_location_' . $form['#node']->type, 0)) {
+  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && variable_get('litemaps_picker_' . $form['#node']->type, 0)) {
     $form = litemaps_form_node_after_build($form, $form_state);
     $form['#after_build'][] = 'litemaps_form_node_after_build';
   }
@@ -214,7 +214,7 @@ function litemaps_form_node_after_build($form, $form_state) {
  * Implementation of hook_nodeapi().
  */
 function litemaps_nodeapi(&$node, $op) {
-  if (variable_get('litemaps_location_' . $node->type, 0)) {
+  if (variable_get('litemaps_picker_' . $node->type, 0)) {
    switch($op) {
      case 'insert':
      case 'update':
