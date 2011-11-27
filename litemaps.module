@@ -215,7 +215,7 @@ function litemaps_form_node_after_build($form, $form_state) {
  */
 function litemaps_nodeapi(&$node, $op) {
   if (variable_get('litemaps_picker_' . $node->type, 0)) {
-   switch($op) {
+   switch ($op) {
      case 'insert':
      case 'update':
        litemaps_set_point('node', $node->nid, $node->litemaps['latitude'], $node->litemaps['longitude']);
@@ -285,7 +285,7 @@ function template_preprocess_views_view_litemaps(&$vars) {
   
   $alias_latitude = $vars['view']->litemaps->alias_latitude;  
   $alias_longitude = $vars['view']->litemaps->alias_longitude;
-  foreach($vars['rows'] as $row_id => $row) {
+  foreach ($vars['rows'] as $row_id => $row) {
     $latitude = $vars['view']->result[$row_id]->{$alias_latitude};
     $longitude = $vars['view']->result[$row_id]->{$alias_longitude};
     $options['markers'][] = array('lat' => $latitude, 'lng' => $longitude, 'content' => $row);

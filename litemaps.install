@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @file Install file for LiteMaps module.
+ */
+
+/**
  * Implementation of hook_install().
  */
 function litemaps_install() {
