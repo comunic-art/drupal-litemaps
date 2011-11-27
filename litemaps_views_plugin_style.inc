@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Class of Views style plugin.
+ */
+
 /*
  * Implementation of views_plugin_style
  */

@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @file
+ * Define LiteMaps Views style plugin parameters.
+
+/**
  * Implements hook_views_plugins().
  */
 function litemaps_views_plugins() {

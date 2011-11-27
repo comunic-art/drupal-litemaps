@@ -260,7 +260,7 @@ function litemaps_node_delete($node) {
  * Implements hook_node_load().
  */
 function litemaps_node_load($nodes, $types) {
-  foreach($nodes as $node) {
+  foreach ($nodes as $node) {
     if (variable_get('litemaps_picker_' . $node->type, 0)) {
       $node->litemaps = litemaps_get_point('node', $node->nid);
     }
