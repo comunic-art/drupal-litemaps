@@ -22,10 +22,10 @@
               $(this).addClass('pickerk-map');
               $(this).before(
               '<div class="pickerk-input">' +
-                '<input id="' + map_id + '-search" type="text" size="50">' +
-                '<input type="radio" name="type" id="' + map_id + '-changetype-all" checked> <label for="' + map_id + '-changetype-all">' + Drupal.t('All') + '</label>' +
-                '<input type="radio" name="type" id="' + map_id + '-changetype-establishment"> <label for="' + map_id + '-changetype-establishment">' + Drupal.t('Establishments') + '</label>' +
-                '<input type="radio" name="type" id="' + map_id + '-changetype-geocode"> <label for="' + map_id + '-changetype-geocode">' + Drupal.t('Geocodes') + '</label>' +
+                '<div class="form-item"><input id="' + map_id + '-search" type="text" size="50" class="form-text"></div>' +
+                '<div class="form-item"><input type="radio" name="type" id="' + map_id + '-changetype-all" checked="checked" class="form-radio"> <label for="' + map_id + '-changetype-all" class="option">' + Drupal.t('All') + '</label></div>' +
+                '<div class="form-item"><input type="radio" name="type" id="' + map_id + '-changetype-establishment" class="form-radio"> <label for="' + map_id + '-changetype-establishment" class="option">' + Drupal.t('Establishments') + '</label></div>' +
+                '<div class="form-item"><input type="radio" name="type" id="' + map_id + '-changetype-geocode" class="form-radio"> <label for="' + map_id + '-changetype-geocode" class="option">' + Drupal.t('Geocodes') + '</label></div>' +
               '</div>');
 
               var input = document.getElementById(map_id + '-search');
