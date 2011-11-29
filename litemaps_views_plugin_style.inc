@@ -46,8 +46,8 @@ class litemaps_views_plugin_style extends views_plugin_style {
           if (isset($data[$field['field_name']])) {
             $form['fields'][$field['field_name']] = array(
               '#type' => 'checkbox',
-              '#title' => $data[$field['field_name']]['title'],
-              '#description' => $data[$field['field_name']]['help'],
+              '#title' => check_plain($data[$field['field_name']]['title']),
+              '#description' => check_plain($data[$field['field_name']]['help']),
               '#default_value' => $this->options['fields'][$field['field_name']],
             );
           }
