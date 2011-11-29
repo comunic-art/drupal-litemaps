@@ -12,9 +12,9 @@ Drupal.litemaps = {
           $(this).litemaps(options);
           if (options.picker) {
             var form = $(this).parents('form');
-            
+
             $(this).wrap('<div class="picker" />');
-            
+
             $(this).addClass('pickerk-map');
             $(this).before(
             '<div class="pickerk-input">' +
@@ -23,19 +23,19 @@ Drupal.litemaps = {
               '<input type="radio" name="type" id="' + map_id + '-changetype-establishment"> <label for="' + map_id + '-changetype-establishment">' + Drupal.t('Establishments') + '</label>' +
               '<input type="radio" name="type" id="' + map_id + '-changetype-geocode"> <label for="' + map_id + '-changetype-geocode">' + Drupal.t('Geocodes') + '</label>' +
             '</div>');
-            
+
             var input = document.getElementById(map_id + '-search');
             var autocomplete = new google.maps.places.Autocomplete(input);
             var map = $(this).data('litemaps_map');
             autocomplete.bindTo('bounds', map);
-            
+
             var infowindow = new google.maps.InfoWindow();
 
             var marker = new google.maps.Marker({
               map: map,
               icon: 'https://chart.googleapis.com/chart?chst=d_map_pin_letter_withshadow&chld=|0000FF|'
             });
-            
+
             google.maps.event.addListener(marker, 'position_changed', function() {
               $('input[name="litemaps[latitude]"]', form).val(marker.getPosition().lat());
               $('input[name="litemaps[longitude]"]', form).val(marker.getPosition().lng());
