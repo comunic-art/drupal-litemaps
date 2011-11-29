@@ -16,7 +16,6 @@ class litemaps_views_plugin_style extends views_plugin_style {
    * @param array $form_state
    */
   function options_form(&$form, &$form_state) {
-    // @todo Implement descriptions and validation
     $form['width'] = array(
       '#type' => 'textfield',
       '#title' => t('Width'),
@@ -42,7 +41,9 @@ class litemaps_views_plugin_style extends views_plugin_style {
     );
   }
 
-
+  /**
+   * Add latitude and longitude to query.
+   */
   function query() {
     $join = new views_join();
     $join->construct('litemaps_points', 'node', 'nid', 'eid');
