@@ -38,9 +38,12 @@ define('LITEMAPS_DEBUG', 0);
 /**
  * Get entity point of an entity.
  *
- * @param $entity Entity type. e. g. node, user, term
- * @param $eid Entity ID. nid for nodes, uid for users, tid for terms
- * @return An array with keys "latitude" and "longitude"
+ * @param $entity
+ *   Entity type. e. g. node, user, term
+ * @param $eid
+ *   Entity ID. nid for nodes, uid for users, tid for terms
+ * @return
+ *   An array with keys "latitude" and "longitude"
  */
 function litemaps_get_point($entity, $eid) {
   $query = "SELECT latitude, longitude FROM {litemaps_points} WHERE entity = '%s' AND eid = %d";
@@ -51,10 +54,14 @@ function litemaps_get_point($entity, $eid) {
 /**
  * Set point for entity. If latitude and longitude are not set, delete point.
  *
- * @param $entity Entity type. e. g. node, user, term
- * @param $eid Entity ID. nid for nodes, uid for users, tid for terms
- * @param $latitude Latitude
- * @param $longitude Longitude
+ * @param $entity
+ *   Entity type. e. g. node, user, term
+ * @param $eid
+ *   Entity ID. nid for nodes, uid for users, tid for terms
+ * @param $latitude
+ *   Latitude
+ * @param $longitude
+ *   Longitude
  */
 function litemaps_set_point($entity, $eid, $latitude = '', $longitude = '') {
   db_query("DELETE FROM {litemaps_points} WHERE entity = '%s' AND eid = %d", $entity, $eid);
@@ -112,10 +119,14 @@ function litemaps_theme() {
 /**
  * LiteMaps element theme hook.
  *
- * @param string $width Width of rendered map. You can specify 'px' or '%'.
- * @param string $height Height of rendered map. You can specify 'px' or '%'.
- * @param array $markers An array with markers
- * @return void Rendered map
+ * @param $width
+ *   Width of rendered map. You can specify 'px' or '%'.
+ * @param $height
+ *   Height of rendered map. You can specify 'px' or '%'.
+ * @param $markers
+ *   An array with markers
+ * @return
+ *   Rendered map
  */
 function theme_litemaps($options = array()) {
   litemaps_add_js();
@@ -238,15 +249,15 @@ function litemaps_nodeapi(&$node, $op) {
 }
 
 /**
-* Implementation of hook_views_api().
-*/
+ * Implementation of hook_views_api().
+ */
 function litemaps_views_api() {
   return array('api' => 2.0);
 }
 
 /**
-* Implementation of hook_views_plugins
-*/
+ * Implementation of hook_views_plugins
+ */
 function litemaps_views_plugins() {
   return array(
     'style' => array(
