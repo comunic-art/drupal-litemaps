@@ -34,36 +34,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
  (function($){
    var litemaps = {
-     
+
      /**
       * Incrementable ID for maps
       */
      mapid: 0,
-     
+
      /**
       * Limits for maps
       */
      limits: {},
-     
+
      /**
       * Initialization function
       */
      init: function(e) {
        litemaps.setSize(e, litemaps.options.width, litemaps.options.height);
        litemaps.setMapId(e);
-       
+
        if (litemaps.options.staticmap) {
          return litemaps.staticmap(e);
        }
-       
+
        var map = new google.maps.Map(e.get(0), litemaps.options);
        litemaps.setMap(e, map);
        litemaps.setMarkers(e);
      },
-     
+
      /**
       * Return an array with default values. Also this define the allowed parameters.
       */
@@ -78,15 +78,15 @@
          staticmap: false
        };
      },
-     
+
      /**
       * Initialize options variables and perform some transformations
       */
      initOptions: function(options) {
        litemaps.options = {};
-       
+
        var defaults = litemaps.defaults();
-       
+
        //
        // Build options
        //
@@ -98,24 +98,24 @@
            litemaps.options[option_id] = defaults[option_id];
          }
        });
-       
+
        // Static
        if (litemaps.options.staticmap) {
          return;
        }
-       
+
        // Zoom
        litemaps.options._zoom = litemaps.options.zoom;
        litemaps.options.zoom = 15;
-       
+
        // Center
        litemaps.options._center = litemaps.options.center;
        litemaps.options.center = new google.maps.LatLng(0, 0);
-       
+
        var typeList = litemaps.getMapTypeList();
        litemaps.options.mapTypeId = typeList[litemaps.options.type];
      },
-     
+
      /**
       * Set size of container
       */
@@ -132,7 +132,7 @@
        e.width(litemaps.options.width);
        e.height(litemaps.options.height);
      },
-     
+
      /**
       * Return a list of available types of map
       */
@@ -144,7 +144,7 @@
          terrain: google.maps.MapTypeId.TERRAIN
        }
      },
-     
+
      /**
       * Add markers to the map
       */
@@ -152,7 +152,7 @@
        var mapid = litemaps.getMapId(e);
        litemaps.markers = {};
        litemaps.markers[mapid] = new Array();
-       
+
        if (litemaps.options.markers.length > 0) {
          var markers = litemaps.options.markers;
          $.each(markers, function(marker_id, marker) { 
@@ -165,7 +165,7 @@
                if (ok) {
                  litemaps.addMarker(e, position.lat(), position.lng(), marker.content);
                }
-               
+
                // All markers has been added and no geocoder request is pending
                if (! litemaps.geocodeIsPending() && markers.length == litemaps._markers) {
                  litemaps.eventMarkersAdded(e);
@@ -177,13 +177,13 @@
            litemaps._markers++;
          });
        }
-       
+
        // No geocoder request is pending
        if (! litemaps.geocodeIsPending()) {
          litemaps.eventMarkersAdded(e);
        }
      },
-     
+
      /**
       * Add marker into map
       */
@@ -191,26 +191,26 @@
        var mapid = litemaps.getMapId(e);
        litemaps.markers[mapid].push({});
        var i = litemaps.markers[mapid].length - 1;
-       
+
        litemaps.markers[mapid][i].marker = new google.maps.Marker({
            position: new google.maps.LatLng(lat, lng),
            map: litemaps.getMap(e)
        });     
-       
+
        if (content) {
          litemaps.markers[mapid][i].infowindow = new google.maps.InfoWindow({
            content: content
          });
-         
+
          google.maps.event.addListener(litemaps.markers[mapid][i].marker, 'click', function() {
            litemaps.markers[mapid][i].infowindow.open(litemaps.getMap(e), litemaps.markers[mapid][i].marker);
          });
        }
-       
+
        return litemaps.markers[mapid][i];
      },
      _markers: 0,
-     
+
      /**
       * Calculate the limits in order to set auto-zoom and auto-center
       */
@@ -224,10 +224,10 @@
            });
          }
        }
-       
+
        return litemaps.limits[mapid];
      },
-     
+
      /**
       * Set the center provided in options
       */
@@ -269,7 +269,7 @@
              var lat = 0;
              var lng = 0;
            }
-           
+
            litemaps.options._center = {};
            litemaps.options._center.lat = lat;
            litemaps.options._center.lng = lng;
@@ -305,31 +305,31 @@
        if (! litemaps._geocoder) {
          litemaps._geocoder = new google.maps.Geocoder();
        }
-       
+
        var _callback = function(results, status) {
          litemaps._geocodeRequests--;
-         
+
          var position;
          var ok = false;
-         
+
          if (status == google.maps.GeocoderStatus.OK) {
            var position = results[0].geometry.location;
            var ok = true;
          }
-           
+
          callback(position, ok);
        }
-       
+
        litemaps._geocodeRequests++;
        litemaps._geocoder.geocode({address: address}, _callback);
-       
+
        return litemaps._geocoder;
      },
      _geocodeRequests: 0,
      geocodeIsPending: function() {
        return litemaps._geocodeRequests > 0;
      },
-     
+
      /**
       * Triggered when all markers are added to map
       */
@@ -337,20 +337,20 @@
        litemaps.setCenter(e);
        litemaps.setZoom(e);
      },
-     
+
      /**
       * Static Maps function. Insert a static map into element.
       */
      staticmap: function(e) {
        var url = "http://maps.google.com/maps/api/staticmap";
        var query = ['sensor=false'];
-       
+
        // Size
        query.push('size=' + litemaps.options.width + 'x' + litemaps.options.height);
-       
+
        // Type
        query.push('maptype=' + litemaps.options.type);
-       
+
        // Markers
        var markers = new Array();
        $.each(litemaps.options.markers, function(marker_id, marker) {
@@ -364,12 +364,12 @@
            markers.push(marker);
          }
        });
-       
+
        if (markers.length > 0) {
          markers = markers.join('|');
          query.push('markers=' + markers);
        }
-       
+
        // Center
        if (litemaps.options.center != 'auto') {
          if (litemaps.options.center.lat && litemaps.options.center.lng) {
@@ -379,41 +379,41 @@
            query.push('center=' + litemaps.options.center);
          }
        }
-       
+
        // Zoom
        if (litemaps.options.zoom != 'auto') {
          query.push('zoom=' + litemaps.options.zoom);
        }
-       
+
        $.each(litemaps.options, function(option_id, option) {
          switch(option_id) {
            case 'markers':
-             
+
              break;
-             
+
            case 'height':
          }
        });
-       
+
        url = url + "?" + query.join('&');
        var html = '<img src="' + url + '" alt="jQuery LiteMaps (http://github.com/lesergi/jquery.litemaps)" />';
-       
+
        litemaps.setMap(e, html);
        e.html(html);
      },
-     
+
      setMap: function(e, map) {
        e.data('litemaps_map', map);
      },
-     
+
      getMap: function(e) {
        return e.data('litemaps_map');
      },
-     
+
      setMapId: function(e) {
        e.data('litemaps_id', litemaps.mapid++);
      },
-     
+
      getMapId: function(e) {
        return e.data('litemaps_id');
      }     
@@ -421,7 +421,7 @@
 
    $.fn.litemaps = function() {
      var options = {};
-     
+
      if (arguments[0]) {
        options = arguments[0];
      }

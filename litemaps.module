@@ -1,6 +1,12 @@
 <?php
 
 /**
+ * @file
+ * Integrates Google Maps API v3 interface with Field API and Views through
+ * jQuery LiteMaps.
+ */
+
+/**
  * Google Maps API JS file
  */
 define('LITEMAPS_GOOGLE_MAPS_API_JS', 'http://maps.google.com/maps/api/js?sensor=false&libraries=places');
@@ -60,17 +66,17 @@ function litemaps_add_js() {
 
 /**
  * Add JS settings for jQuery LiteMaps plugin
- * 
+ *
  * @param $settings
  *   Array to pass to jQuery LiteMaps
  */
 function litemaps_add_js_settings($settings) {
   $added = &drupal_static(__FUNCTION__, array());
-  
+
   if (isset($settings['map_id']) && isset($added[$settings['map_id']])) {
     return;
   }
-  
+
   drupal_add_js(array('litemaps' => array($settings)), array('type' => 'setting', 'scope' => JS_DEFAULT));
   $added[$settings['map_id']] = $settings;
 }
@@ -103,13 +109,13 @@ function litemaps_theme() {
 function theme_litemaps($variables) {
   $options = $variables['options'];
   litemaps_add_js();
-  
+
   if (! isset($options['map_id'])) {
     $options['map_id'] = litemaps_autoid();
   }
 
   litemaps_add_js_settings($options);
-  
+
   return "<div id='" . $options['map_id'] . "'></div>";
 }
 
@@ -121,7 +127,7 @@ function litemaps_views_api() {
 }
 
 /**
- * Implementation of hook_preprocess_views_view_litemaps().
+ * Implements hook_preprocess_views_view_litemaps().
  */
 function template_preprocess_views_view_litemaps(&$vars) {
   if (! count($vars['rows']) || $vars['view']->editing) {
@@ -167,12 +173,12 @@ function litemaps_field_info() {
 function litemaps_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   foreach ($items as $delta => $item) {
     if ($item['latitude'] != '' && $item['longitude'] != '') {
-      if (! is_numeric($item['latitude']) || ! is_numeric($item['longitude']) ) {
+      if (! is_numeric($item['latitude']) || ! is_numeric($item['longitude'])) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'litemaps_point_invalid',
           'message' => t('%name: the selected point is not valid.', array('%name' => $instance['label'])),
         );
-        
+
         if (isset($item['js_settings']['markers'][0])) {
           $item['js_settings']['markers'][0] = array(
             'lat' => $item['js_settings']['markers'][0]['lat'],
@@ -185,14 +191,13 @@ function litemaps_field_validate($entity_type, $entity, $field, $instance, $lang
           $item['js_settings']['center'] = 'auto';
         }
       }
-      else {      
-        // Add JS settings
+      else {
         $item['js_settings']['markers'][0] = array(
           'lat' => $item['latitude'],
           'lng' => $item['longitude'],
         );
       }
-      
+
       litemaps_add_js();
       litemaps_add_js_settings($item['js_settings']);
     }
@@ -213,7 +218,7 @@ function litemaps_field_is_empty($item, $field) {
   if ($item['latitude'] == '' && $item['longitude'] == '') {
     return TRUE;
   }
-  
+
   return FALSE;
 }
 
@@ -251,21 +256,21 @@ function litemaps_field_formatter_settings_form($field, $instance, $view_mode, $
       '#description' => _litemaps_settings_description('height'),
       '#default_value' => $settings['height'],
     );
-    
+
     $element['width'] = array(
       '#type' => 'textfield',
       '#title' => t('Map width'),
       '#description' => _litemaps_settings_description('width'),
       '#default_value' => $settings['width'],
     );
-    
+
     $element['center'] = array(
       '#type' => 'textfield',
       '#title' => t('Map center'),
       '#description' => _litemaps_settings_description('center'),
       '#default_value' => $settings['center'],
     );
-    
+
     $element['zoom'] = array(
       '#type' => 'select',
       '#title' => t('Map zoom'),
@@ -273,7 +278,7 @@ function litemaps_field_formatter_settings_form($field, $instance, $view_mode, $
       '#options' => _litemaps_settings_options_zoom(),
       '#default_value' => $settings['zoom'],
     );
-    
+
     $element['type'] = array(
       '#type' => 'select',
       '#title' => t('Map type'),
@@ -281,7 +286,7 @@ function litemaps_field_formatter_settings_form($field, $instance, $view_mode, $
       '#options' => _litemaps_settings_options_type(),
       '#default_value' => $settings['type'],
     );
-    
+
     $element['staticmap'] = array(
       '#type' => 'checkbox',
       '#title' => t('Static map'),
@@ -289,7 +294,7 @@ function litemaps_field_formatter_settings_form($field, $instance, $view_mode, $
       '#default_value' => $settings['staticmap'],
     );
   }
- 
+
   return $element;
 }
 
@@ -299,7 +304,7 @@ function litemaps_field_formatter_settings_form($field, $instance, $view_mode, $
 function _litemaps_settings_options_zoom() {
   $options = array('auto' => t('Automatic'));
   $options += drupal_map_assoc(range(0, 22));
-  
+
   return $options;
 }
 
@@ -317,11 +322,11 @@ function _litemaps_settings_options_type() {
 
 /**
  * Return the description text of given option.
- * 
+ *
  * @param $option
  *   Option name
  * @return
- *   Text with description 
+ *   Text with description
  */
 function _litemaps_settings_description($option) {
   $options = array(
@@ -332,7 +337,7 @@ function _litemaps_settings_description($option) {
     'type' => t('Type of map to display.'),
     'staticmap' => t('Show a map image using Google Static Maps API.'),
   );
-  
+
   return $options[$option];
 }
 
@@ -346,16 +351,16 @@ function litemaps_field_formatter_settings_summary($field, $instance, $view_mode
   $summary = array();
   if ($display['type'] == 'litemaps_point_map') {
     $summary[] = t('Map height: @value', array('@value' => $settings['height']));
-    $summary[] = t('Map width: @value', array('@value' => $settings['width'])) ;
-    
+    $summary[] = t('Map width: @value', array('@value' => $settings['width']));
+
     $summary[] = t('Map center: @value', array('@value' => (! empty($settings['center']) ? $settings['center'] : t('Automatic'))));
-    
+
     $options = _litemaps_settings_options_zoom();
     $summary[] = t('Map zoom: @value', array('@value' => $options[$settings['zoom']]));
-    
+
     $options = _litemaps_settings_options_type();
     $summary[] = t('Map type: @value', array('@value' => $options[$settings['type']]));
-    
+
     $summary[] = t('Static map: @value', array('@value' => $settings['staticmap'] ? t('Yes') : t('No')));
   }
 
@@ -416,33 +421,33 @@ function litemaps_field_widget_settings_form($field, $instance) {
 
   if ($widget['type'] == 'litemaps_point_picker') {
     $settings = $widget['settings']['picker'];
-    
+
     $form['picker'] = array(
       '#type' => 'fieldset',
       '#title' => t('Picker map'),
     );
-    
+
     $form['picker']['height'] = array(
       '#type' => 'textfield',
       '#title' => t('Height'),
       '#description' => _litemaps_settings_description('height'),
       '#default_value' => $settings['height'],
     );
-    
+
     $form['picker']['width'] = array(
       '#type' => 'textfield',
       '#title' => t('Width'),
       '#description' => _litemaps_settings_description('width'),
       '#default_value' => $settings['width'],
     );
-    
+
     $form['picker']['center'] = array(
       '#type' => 'textfield',
       '#title' => t('Center'),
       '#description' => _litemaps_settings_description('center'),
       '#default_value' => $settings['center'],
     );
-    
+
     $form['picker']['zoom'] = array(
       '#type' => 'select',
       '#title' => t('Zoom'),
@@ -450,7 +455,7 @@ function litemaps_field_widget_settings_form($field, $instance) {
       '#options' => _litemaps_settings_options_zoom(),
       '#default_value' => $settings['zoom'],
     );
-    
+
     $form['picker']['type'] = array(
       '#type' => 'select',
       '#title' => t('Type'),
@@ -459,7 +464,7 @@ function litemaps_field_widget_settings_form($field, $instance) {
       '#default_value' => $settings['type'],
     );
   }
-  
+
   return $form;
 }
 
@@ -468,11 +473,11 @@ function litemaps_field_widget_settings_form($field, $instance) {
  */
 function litemaps_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   $element = $base;
-  
+
   $element['#type'] = 'fieldset';
-  
+
   $widget = $instance['widget'];
-  
+
   if ($widget['type'] == 'litemaps_point_picker') {
     $settings = $widget['settings']['picker'];
     $latitude = isset($items[$delta]['latitude']) ? $items[$delta]['latitude'] : '';
@@ -525,6 +530,6 @@ function litemaps_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#default_value' => $longitude,
     );
   }
-  
+
   return $element;
 }

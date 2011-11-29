@@ -3,6 +3,7 @@
 /**
  * @file
  * Define LiteMaps Views style plugin parameters.
+ */
 
 /**
  * Implements hook_views_plugins().

@@ -48,7 +48,7 @@ function litemaps_uninstall() {
     'litemaps_google_maps_api_js',
     'litemaps_debug',
   );
-  
+
   foreach ($variables as $variable) {
     variable_del($variable);
   }

@@ -9,7 +9,10 @@
  * Implementation of views_plugin_style
  */
 class litemaps_views_plugin_style extends views_plugin_style {
-  
+
+  /**
+   * Set default values for map options.
+   */
   function option_definition() {
     $options = parent::option_definition();
     $options['map'] = array(
@@ -22,21 +25,21 @@ class litemaps_views_plugin_style extends views_plugin_style {
     );
     return $options;
   }
-  
+
   /**
    * Provide a form for setting options.
    */
   function options_form(&$form, &$form_state) {
     $fields = field_info_fields();
     $options = array();
-    
+
     $form['fields'] = array(
       '#type' => 'fieldset',
       '#title' => t('Fields'),
       '#description' => t('The fields to use as points in the map.'),
       '#tree' => TRUE,
     );
-    
+
     foreach ($fields as $field) {
       if ($field['type'] == 'litemaps_point') {
         foreach (field_views_field_default_views_data($field) as $data) {
@@ -51,35 +54,35 @@ class litemaps_views_plugin_style extends views_plugin_style {
         }
       }
     }
-    
+
     $form['map'] = array(
       '#type' => 'fieldset',
       '#title' => t('Map'),
       '#description' => t('Settings of the map to display.'),
       '#tree' => TRUE,
     );
-    
+
     $form['map']['height'] = array(
       '#type' => 'textfield',
       '#title' => t('Map height'),
       '#description' => _litemaps_settings_description('height'),
       '#default_value' => $this->options['map']['height'],
     );
-    
+
     $form['map']['width'] = array(
       '#type' => 'textfield',
       '#title' => t('Map width'),
       '#description' => _litemaps_settings_description('width'),
       '#default_value' => $this->options['map']['width'],
     );
-    
+
     $form['map']['center'] = array(
       '#type' => 'textfield',
       '#title' => t('Map center'),
       '#description' => _litemaps_settings_description('center'),
       '#default_value' => $this->options['map']['center'],
     );
-    
+
     $form['map']['zoom'] = array(
       '#type' => 'select',
       '#title' => t('Map zoom'),
@@ -87,7 +90,7 @@ class litemaps_views_plugin_style extends views_plugin_style {
       '#options' => _litemaps_settings_options_zoom(),
       '#default_value' => $this->options['map']['zoom'],
     );
-    
+
     $form['map']['type'] = array(
       '#type' => 'select',
       '#title' => t('Map type'),
@@ -95,7 +98,7 @@ class litemaps_views_plugin_style extends views_plugin_style {
       '#options' => _litemaps_settings_options_type(),
       '#default_value' => $this->options['map']['type'],
     );
-    
+
     $form['map']['staticmap'] = array(
       '#type' => 'checkbox',
       '#title' => t('Static map'),
@@ -104,9 +107,12 @@ class litemaps_views_plugin_style extends views_plugin_style {
     );
   }
 
+  /**
+   * Append to query latitude and longitude values.
+   */
   function query() {
     parent::query();
-    
+
     $fields = array_filter($this->options['fields']);
     foreach ($fields as $field => $status) {
       $field_info = field_info_field($field);
@@ -115,11 +121,11 @@ class litemaps_views_plugin_style extends views_plugin_style {
           $table = $data[$field]['field']['table'];
           $latitude = $field . "_latitude";
           $longitude = $field . "_longitude";
-          
+
           $table = $this->view->query->ensure_table($table);
           $latitude_alias = $this->view->query->add_field($table, $latitude);
           $longitude_alias = $this->view->query->add_field($table, $longitude);
-          
+
           $this->view->litemaps->aliases[] = array(
             'latitude' => $latitude_alias,
             'longitude' => $longitude_alias,
@@ -127,7 +133,7 @@ class litemaps_views_plugin_style extends views_plugin_style {
         }
       }
     }
-    
+
     if (isset($this->row_plugin)) {
       $this->row_plugin->query();
     }
