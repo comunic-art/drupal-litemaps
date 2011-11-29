@@ -5,67 +5,51 @@
  *
  */
 
-
 /**
- * Implements hook_install().
+ * Implements hook_field_schema().
  */
-function litemaps_install() {
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_install_schema('litemaps')
+function litemaps_field_schema($field) {
+  switch ($field['type']) {
+    case 'litemaps_point' :
+      $columns = array(
+        'latitude' => array(
+          'type' => 'numeric',
+          'precision' => 21,
+          'scale' => 17,
+          'not null' => FALSE,
+          'default' => NULL,
+        ),
+        'longitude' => array(
+          'type' => 'numeric',
+          'precision' => 21,
+          'scale' => 17,
+          'not null' => FALSE,
+          'default' => NULL,
+        ),
+      );
+      break;
+  }
+  return array(
+    'columns' => $columns,
+  );
 }
 
 /**
- * Implentation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function litemaps_uninstall() {
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_uninstall_schema('litemaps')
-}
-
-/**
- * Implements hook_schema().
- */
-function litemaps_schema() {
-  $schema['litemaps_points'] = array(
-    'description' => 'Locational points.',
-    'fields' => array(
-      'entity' => array(
-        'description' => 'Entity type.',
-        'type' => 'varchar',
-        'length' => 64,
-        'default' => '',
-        'not null' => TRUE,
-      ),
-      'eid' => array(
-        'description' => 'Entity ID.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'latitude' => array(
-        'description' => 'Location latitude (decimal degrees).',
-        'type' => 'numeric',
-        'precision' => 21,
-        'scale' => 17,
-        'not null' => FALSE,
-        'default' => NULL,
-      ),
-      'longitude' => array(
-        'description' => 'Location longitude (decimal degrees).',
-        'type' => 'numeric',
-        'precision' => 21,
-        'scale' => 17,
-        'not null' => FALSE,
-        'default' => NULL,
-      ),
-    ),
-    'indexes' => array(
-      'entity' => array('entity'),
-      'eid' => array('eid'),
-    ),
-    'primary key' => array('entity', 'eid'),
+  $variables = array(
+    'litemaps_default_height',
+    'litemaps_default_width',
+    'litemaps_default_center',
+    'litemaps_default_zoom',
+    'litemaps_default_type',
+    'litemaps_default_staticmap',
+    'litemaps_google_maps_api_js',
+    'litemaps_debug',
   );
-
-  return $schema;
+  
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
 }

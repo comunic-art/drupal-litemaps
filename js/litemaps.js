@@ -1,21 +1,22 @@
 (function ($) {
   Drupal.behaviors.litemaps = {
     attach: function(context, settings) {
-      Drupal.litemaps.init();
-      Drupal.litemaps.fieldsetSummary(context);
+      Drupal.litemaps.init(context, settings);
     }
   }
 
   Drupal.litemaps = {};
 
   Drupal.litemaps = {
-    init: function() {
-      if (typeof Drupal.settings.litemaps == "object") {
-        $.each(Drupal.settings.litemaps, function(map_id, options) {
-          $('#' + map_id + ":not(.litemaps-processed)").each(function() {
+    init: function(context, settings) {
+      if (typeof settings.litemaps != 'undefined') {
+        $.each(settings.litemaps, function(k, options) {
+          var map_id = options.map_id;
+          $('#' + map_id + ":not(.litemaps-processed)", context).each(function() {
             $(this).litemaps(options);
             if (options.picker) {
               var form = $(this).parents('form');
+              var fieldset = $(this).parents('fieldset');
 
               $(this).wrap('<div class="picker" />');
 
@@ -41,8 +42,8 @@
               });
 
               google.maps.event.addListener(marker, 'position_changed', function() {
-                $('input[name="litemaps[latitude]"]', form).val(marker.getPosition().lat());
-                $('input[name="litemaps[longitude]"]', form).val(marker.getPosition().lng());
+                $('.litemaps_point_picker-latitude', fieldset).val(marker.getPosition().lat());
+                $('.litemaps_point_picker-longitude', fieldset).val(marker.getPosition().lng());
               });
 
               google.maps.event.addListener(map, 'click', function(e) {
@@ -93,18 +94,6 @@
           }).addClass('litemaps-processed');
         });
       }
-    },
-
-    fieldsetSummary: function (context) {
-      $('fieldset.litemaps-node-type-settings-form', context).drupalSetSummary(function (context) {
-        if ($('.form-item-litemaps-picker input').is(':checked')) {
-          var summary = Drupal.t('Show location picker in node form');
-        }
-        else {
-          var summary = Drupal.t("Don't show location picker in node form");
-        }
-        return Drupal.checkPlain(summary);
-      });
     }
   }
 }(jQuery));
