@@ -3,4 +3,3 @@ description = Provides Google Maps API v3 integration to Views through jQuery Li
 core = 7.x
 dependencies[] = views
 files[] = litemaps_views_plugin_style.inc
-stylesheets[all][] = litemaps.css

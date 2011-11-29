@@ -25,9 +25,6 @@ class litemaps_views_plugin_style extends views_plugin_style {
   
   /**
    * Provide a form for setting options.
-   *
-   * @param array $form
-   * @param array $form_state
    */
   function options_form(&$form, &$form_state) {
     $fields = field_info_fields();

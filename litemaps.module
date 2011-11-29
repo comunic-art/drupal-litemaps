@@ -60,7 +60,9 @@ function litemaps_add_js() {
 
 /**
  * Add JS settings for jQuery LiteMaps plugin
- * @param $settings Array to pass to jQuery LiteMaps
+ * 
+ * @param $settings
+ *   Array to pass to jQuery LiteMaps
  */
 function litemaps_add_js_settings($settings) {
   $added = &drupal_static(__FUNCTION__, array());
@@ -95,7 +97,8 @@ function litemaps_theme() {
 /**
  * LiteMaps element theme hook.
  *
- * @return void Rendered map
+ * @return
+ *   Rendered map
  */
 function theme_litemaps($variables) {
   $options = $variables['options'];
@@ -315,8 +318,10 @@ function _litemaps_settings_options_type() {
 /**
  * Return the description text of given option.
  * 
- * @param $option Option name
- * @return Text with description 
+ * @param $option
+ *   Option name
+ * @return
+ *   Text with description 
  */
 function _litemaps_settings_description($option) {
   $options = array(
